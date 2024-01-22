@@ -18,6 +18,7 @@ namespace PlayHouseConnector
         public event Action? OnDisconnect;//
 
         public ConnectorConfig ConnectorConfig { get; private set; } = new();
+
         private LOG<Connector> _log = new();
         private ClientNetwork? _clientNetwork = null;
         
