@@ -1,4 +1,5 @@
 ﻿using CommonLib;
+using PlayHouse;
 using System;
 
 namespace PlayHouseConnector.Network
@@ -42,11 +43,11 @@ namespace PlayHouseConnector.Network
         }
     }
 
-    public class PooledBufferPayload : IPayload
+    public class PooledByteBufferPayload : IPayload
     {
-        private readonly PooledBuffer _buffer;
+        private readonly PooledByteBuffer _buffer;
 
-        public PooledBufferPayload(PooledBuffer buffer)
+        public PooledByteBufferPayload(PooledByteBuffer buffer)
         {
             _buffer = buffer;
         }
@@ -57,12 +58,12 @@ namespace PlayHouseConnector.Network
             _buffer.Dispose();
         }
 
-        public PooledBuffer GetBuffer()
+        public PooledByteBuffer GetBuffer()
         {
             return _buffer;
         }
 
-        public ReadOnlySpan<byte> Data => new ReadOnlySpan<byte>(_buffer.Data,0,_buffer.Size);
+        public ReadOnlyMemory<byte> Data => _buffer.AsMemory();
     }
 
 
@@ -106,7 +107,7 @@ namespace PlayHouseConnector.Network
                                                             
         }
 
-        internal void GetBytes(RingBuffer buffer)
+        internal void GetBytes(PooledByteBuffer buffer)
         {
             var body = Payload.Data;
             int bodySize = body.Length;
@@ -122,7 +123,7 @@ namespace PlayHouseConnector.Network
             buffer.WriteInt16(XBitConverter.ToNetworkOrder(Header.MsgSeq));
             buffer.Write(Header.StageIndex);
 
-            buffer.Write(Payload.Data);
+            buffer.Write(Payload.DataSpan);
         }
 
         internal void SetMsgSeq(ushort seq)
